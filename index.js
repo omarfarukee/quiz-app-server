@@ -19,6 +19,7 @@ const run = async () => {
     try {
         const db = client.db("quiz-app");
         const userCollections = db.collection("User")
+        const questionCollections = db.collection("Question")
 
         app.post('/create-user', async (req, res) => {
             try {
@@ -60,6 +61,20 @@ const run = async () => {
                 console.error('Error logging in:', error);
                 res.status(500).json({ error: 'Internal server error' });
             }
+        });
+
+        app.post("/create-question", async (req, res) => {
+            const question = req.body;
+            console.log(question);
+            const result = await questionCollections.insertOne(question);
+            res.send(result);
+        });
+
+        app.get("/categories", async (req, res) => {
+            const cursor = questionCollections.find({});
+            const allCat = await cursor.toArray();
+
+            res.send({ status: true, data: allCat });
         });
 
     }
