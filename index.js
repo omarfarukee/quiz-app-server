@@ -45,6 +45,23 @@ const run = async () => {
             }
         })
 
+        app.post('/user-login', async (req, res) => {
+            try {
+                const { phoneNumber, pass } = req.body;
+                const user = await userCollections.findOne({ phoneNumber });
+                if (!user) {
+                    return res.status(401).json({ error: 'Invalid phone number' });
+                }
+                if (user.pass !== pass) {
+                    return res.status(401).json({ error: 'Invalid password' });
+                }
+                res.status(200).json({ message: 'Login successful', user: user });
+            } catch (error) {
+                console.error('Error logging in:', error);
+                res.status(500).json({ error: 'Internal server error' });
+            }
+        });
+
     }
     finally {
 
