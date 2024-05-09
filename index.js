@@ -46,7 +46,14 @@ const run = async () => {
             }
         })
 
-        app.post('/user-login', async (req, res) => {
+        app.get("/api/User/Fetch", async (req, res) => {
+            const cursor = userCollections.find({});
+            const allUser = await cursor.toArray();
+
+            res.send({ status: true, data: allUser });
+        });
+
+        app.post('api/User/login', async (req, res) => {
             try {
                 const { phoneNumber, pass } = req.body;
                 const user = await userCollections.findOne({ phoneNumber });
