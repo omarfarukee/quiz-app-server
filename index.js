@@ -20,8 +20,9 @@ const run = async () => {
         const db = client.db("quiz-app");
         const userCollections = db.collection("User")
         const questionCollections = db.collection("Question")
+        const resultCollections = db.collection("Result")
 
-        app.post('/create-user', async (req, res) => {
+        app.post('/api/User', async (req, res) => {
             try {
 
                 const { pass,phoneNumber } = req.body;
@@ -53,7 +54,7 @@ const run = async () => {
             res.send({ status: true, data: allUser });
         });
 
-        app.post('api/User/login', async (req, res) => {
+        app.post('/api/User/login', async (req, res) => {
             try {
                 const { phoneNumber, pass } = req.body;
                 const user = await userCollections.findOne({ phoneNumber });
@@ -70,12 +71,35 @@ const run = async () => {
             }
         });
 
-        app.post("/create-question", async (req, res) => {
+        app.post("/api/Question", async (req, res) => {
             const question = req.body;
             console.log(question);
             const result = await questionCollections.insertOne(question);
             res.send(result);
         });
+        app.get("/api/Question/Fetch", async (req, res) => {
+            const cursor = questionCollections.find({});
+            const allQus = await cursor.toArray();
+            res.send({ status: true, data: allQus });
+        });
+
+        app.get("/api/Question/getByCatName/:category", async (req, res) => {
+            const category = req.params.category;
+            console.log(category)
+            try {
+                const cursor = questionCollections.find({ questionCategory: category });
+                const question = await cursor.toArray();
+                if (question.length === 0) {
+                    res.status(404).send({ status: false, message: "Question not found" });
+                } else {
+                    res.send({ status: true, data: question });
+                }
+            } catch (error) {
+                console.error("Error fetching question:", error);
+                res.status(500).send({ status: false, message: "Internal server error" });
+            }
+        });
+        
 
         app.get("/categories", async (req, res) => {
             const cursor = questionCollections.find({});
@@ -83,6 +107,23 @@ const run = async () => {
 
             res.send({ status: true, data: allCat });
         });
+
+        app.post("/api/Result", async (req, res) => {
+            try {
+                const resultData = req.body; // Assuming the request body contains the data to be inserted
+                // You may want to validate resultData before proceeding further
+        
+                const resultCollections= db.collection("Result");
+                const result = await resultCollections.insertOne(resultData);
+        
+                res.status(201).send({ status: true, message: "Result added successfully", data: result.ops });
+            } catch (error) {
+                console.error("Error adding result:", error);
+                res.status(500).send({ status: false, message: "Internal server error" });
+            }
+        });
+        
+
 
     }
     finally {
