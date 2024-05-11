@@ -24,7 +24,6 @@ const run = async () => {
 
         app.post('/api/User', async (req, res) => {
             try {
-
                 const { pass,phoneNumber } = req.body;
                 const existingUser = await userCollections.findOne({ $or: [ { pass }, { phoneNumber }] });
                 if (existingUser) {
@@ -39,8 +38,8 @@ const run = async () => {
 
                 const newUser = req.body
                 const result = await userCollections.insertOne(newUser);
-                console.log(newUser)
-                res.status(201).json({ message: 'User created successfully',result, user:newUser  });
+                // console.log(result)
+                res.status(201).json({ message: 'User created successfully', result , user: newUser  });
             } catch (error) {
                 console.error('Error creating user:', error);
                 res.status(500).send('Error creating user: ' + error.message);
