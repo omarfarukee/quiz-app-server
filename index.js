@@ -85,7 +85,6 @@ const run = async () => {
 
         app.get("/api/Question/getByCatName/:category", async (req, res) => {
             const category = req.params.category;
-            console.log(category)
             try {
                 const cursor = questionCollections.find({ questionCategory: category });
                 const question = await cursor.toArray();
@@ -107,11 +106,16 @@ const run = async () => {
 
             res.send({ status: true, data: allCat });
         });
+        app.get("/api/Result/Fetch", async (req, res) => {
+            const cursor = resultCollections.find({});
+            const allResult = await cursor.toArray();
+
+            res.send({ status: true, data: allResult });
+        });
 
         app.post("/api/Result", async (req, res) => {
             try {
-                const resultData = req.body; // Assuming the request body contains the data to be inserted
-                // You may want to validate resultData before proceeding further
+                const resultData = req.body; 
         
                 const resultCollections= db.collection("Result");
                 const result = await resultCollections.insertOne(resultData);
@@ -122,7 +126,48 @@ const run = async () => {
                 res.status(500).send({ status: false, message: "Internal server error" });
             }
         });
+
+        app.put("/api/Result/:id", async (req, res) => {
+            try {
+                const resultId = req.params.id;
+                const updatedData = req.body;
         
+                const resultCollections = db.collection("Result");
+                const result = await resultCollections.updateOne(
+                    { _id: new ObjectId(resultId) }, // Specify the document by its ID
+                    { $set: updatedData } // Update the document with new data
+                );
+        
+                if (result.matchedCount === 0) {
+                    // If no document was found with the specified ID
+                    return res.status(404).send({ status: false, message: "Result not found" });
+                }
+        
+                res.status(200).send({ status: true, message: "Result updated successfully" });
+            } catch (error) {
+                console.error("Error updating result:", error);
+                res.status(500).send({ status: false, message: "Internal server error" });
+            }
+        });
+        
+        
+        app.get("/api/Result/getByCatName/:category", async (req, res) => {
+            const category = req.params.category;
+            console.log(category)
+            try {
+                const cursor = resultCollections.find({ 
+                    categoryName: category });
+                const question = await cursor.toArray();
+                if (question.length === 0) {
+                    res.status(404).send({ status: false, message: "result not found" });
+                } else {
+                    res.send({ status: true, data: question });
+                }
+            } catch (error) {
+                console.error("Error fetching question:", error);
+                res.status(500).send({ status: false, message: "Internal server error" });
+            }
+        });
 
 
     }
